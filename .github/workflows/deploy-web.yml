@@ -25,8 +25,17 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+      # ============================================================
+      # 1. CHECKOUT SOURCE
+      # ============================================================
+
       - name: Checkout source
         uses: actions/checkout@v6
+
+
+      # ============================================================
+      # 2. SETUP FLUTTER
+      # ============================================================
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -34,33 +43,567 @@ jobs:
           channel: stable
           cache: true
 
+
       - name: Show Flutter version
         run: flutter --version
+
+
+      # ============================================================
+      # 3. INSTALL DEPENDENCIES
+      # ============================================================
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build Flutter Web
-        run: flutter build web --release --base-href "/quran_flutter_app/"
 
-      - name: Disable Jekyll
-        run: touch build/web/.nojekyll
+      # ============================================================
+      # 4. BUILD FLUTTER WEB
+      #
+      # Flutter asli akan berada di:
+      #
+      # /quran_flutter_app/app/
+      #
+      # Bukan lagi langsung di:
+      #
+      # /quran_flutter_app/
+      # ============================================================
+
+      - name: Build Flutter Web
+        run: >
+          flutter build web
+          --release
+          --base-href "/quran_flutter_app/app/"
+
+
+      # ============================================================
+      # 5. PREPARE GITHUB PAGES DIRECTORY
+      #
+      # Hasil akhirnya:
+      #
+      # pages/
+      # ├── index.html
+      # ├── .nojekyll
+      # └── app/
+      #     ├── index.html
+      #     ├── main.dart.js
+      #     ├── flutter_bootstrap.js
+      #     ├── assets/
+      #     └── ...
+      # ============================================================
+
+      - name: Prepare Pages directory
+        run: |
+          rm -rf pages
+          mkdir -p pages/app
+
+          cp -a build/web/. pages/app/
+
+          touch pages/.nojekyll
+
+
+      # ============================================================
+      # 6. CREATE DESKTOP-ONLY PHONE MOCKUP
+      #
+      # Desktop:
+      #   /quran_flutter_app/
+      #   -> phone mockup
+      #
+      # Mobile/tablet:
+      #   /quran_flutter_app/
+      #   -> redirect ke /quran_flutter_app/app/
+      #
+      # Source Flutter tidak diubah.
+      # ============================================================
+
+      - name: Create desktop demo shell
+        run: |
+          cat > pages/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="id">
+          <head>
+            <meta charset="UTF-8">
+
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1.0"
+            >
+
+            <meta
+              name="theme-color"
+              content="#101410"
+            >
+
+            <title>Quran Flutter App</title>
+
+            <style>
+              *,
+              *::before,
+              *::after {
+                box-sizing: border-box;
+              }
+
+              html,
+              body {
+                margin: 0;
+                padding: 0;
+
+                width: 100%;
+                min-width: 100%;
+                height: 100%;
+                min-height: 100%;
+
+                overflow: hidden;
+              }
+
+              body {
+                font-family:
+                  Inter,
+                  ui-sans-serif,
+                  system-ui,
+                  -apple-system,
+                  BlinkMacSystemFont,
+                  "Segoe UI",
+                  sans-serif;
+
+                background:
+                  radial-gradient(
+                    circle at 50% 0%,
+                    #26382b 0%,
+                    #18231b 28%,
+                    #101610 58%,
+                    #080b09 100%
+                  );
+
+                color: #ffffff;
+              }
+
+
+              /* ==================================================
+                 DESKTOP WRAPPER
+                 ================================================== */
+
+              .desktop-demo {
+                width: 100vw;
+                height: 100vh;
+                height: 100dvh;
+
+                display: flex;
+
+                align-items: center;
+                justify-content: center;
+
+                padding: 24px;
+              }
+
+
+              /* ==================================================
+                 PHONE DEVICE
+                 ================================================== */
+
+              .phone {
+                position: relative;
+
+                height: min(
+                  860px,
+                  calc(100dvh - 48px)
+                );
+
+                aspect-ratio: 430 / 932;
+
+                padding: 10px;
+
+                border-radius: 52px;
+
+                background:
+                  linear-gradient(
+                    145deg,
+                    #303030 0%,
+                    #090909 35%,
+                    #000000 70%,
+                    #202020 100%
+                  );
+
+                border:
+                  1px solid
+                  rgba(255, 255, 255, 0.20);
+
+                box-shadow:
+                  0 60px 120px rgba(0, 0, 0, 0.55),
+                  0 25px 60px rgba(0, 0, 0, 0.50),
+                  inset 0 1px 1px rgba(255, 255, 255, 0.22);
+              }
+
+
+              /* ==================================================
+                 PHONE SCREEN
+                 ================================================== */
+
+              .phone-screen {
+                display: block;
+
+                width: 100%;
+                height: 100%;
+
+                margin: 0;
+                padding: 0;
+
+                border: 0;
+                outline: 0;
+
+                border-radius: 43px;
+
+                background: #ffffff;
+
+                overflow: hidden;
+              }
+
+
+              /* ==================================================
+                 DYNAMIC ISLAND / CAMERA AREA
+                 ================================================== */
+
+              .dynamic-island {
+                position: absolute;
+
+                top: 20px;
+                left: 50%;
+
+                transform: translateX(-50%);
+
+                width: 105px;
+                height: 29px;
+
+                border-radius: 999px;
+
+                background: #000000;
+
+                box-shadow:
+                  0 1px 2px rgba(255, 255, 255, 0.08);
+
+                pointer-events: none;
+
+                z-index: 20;
+              }
+
+
+              .camera-dot {
+                position: absolute;
+
+                top: 28px;
+
+                left:
+                  calc(50% + 32px);
+
+                width: 7px;
+                height: 7px;
+
+                border-radius: 50%;
+
+                background: #101c24;
+
+                pointer-events: none;
+
+                z-index: 21;
+              }
+
+
+              /* ==================================================
+                 SIDE BUTTONS
+                 ================================================== */
+
+              .button {
+                position: absolute;
+
+                width: 3px;
+
+                background: #151515;
+
+                border-radius: 4px;
+              }
+
+
+              .button-left-1 {
+                left: -4px;
+
+                top: 145px;
+
+                height: 32px;
+              }
+
+
+              .button-left-2 {
+                left: -4px;
+
+                top: 200px;
+
+                height: 65px;
+              }
+
+
+              .button-left-3 {
+                left: -4px;
+
+                top: 280px;
+
+                height: 65px;
+              }
+
+
+              .button-right {
+                right: -4px;
+
+                top: 220px;
+
+                height: 90px;
+              }
+
+
+              /* ==================================================
+                 DECORATIVE BACKGROUND GLOW
+                 ================================================== */
+
+              .glow {
+                position: fixed;
+
+                width: 520px;
+                height: 520px;
+
+                border-radius: 50%;
+
+                filter: blur(120px);
+
+                opacity: 0.16;
+
+                pointer-events: none;
+              }
+
+
+              .glow-one {
+                top: -250px;
+                left: -150px;
+
+                background: #7ed889;
+              }
+
+
+              .glow-two {
+                right: -180px;
+                bottom: -280px;
+
+                background: #65c980;
+              }
+
+
+              /* ==================================================
+                 NON DESKTOP SAFETY
+                 ================================================== */
+
+              @media
+                (max-width: 1023px),
+                (hover: none),
+                (pointer: coarse) {
+
+                .desktop-demo {
+                  display: none;
+                }
+              }
+            </style>
+
+
+            <script>
+              (() => {
+                /*
+                 * Mockup hanya digunakan jika:
+                 *
+                 * 1. viewport >= 1024 px
+                 * 2. device mendukung hover
+                 * 3. pointer utama bertipe fine
+                 *
+                 * Ini lebih akurat daripada sekadar mengecek
+                 * user-agent "Android", "iPhone", dsb.
+                 */
+
+                const desktopQuery =
+                  window.matchMedia(
+                    "(min-width: 1024px) and " +
+                    "(hover: hover) and " +
+                    "(pointer: fine)"
+                  );
+
+
+                /*
+                 * Jika bukan environment desktop,
+                 * langsung buka Flutter App asli.
+                 */
+
+                if (!desktopQuery.matches) {
+                  window.location.replace("./app/");
+                  return;
+                }
+
+
+                /*
+                 * Jika window desktop diperkecil sampai masuk
+                 * kondisi non-desktop, arahkan ke Flutter asli.
+                 */
+
+                const handleEnvironmentChange = (event) => {
+                  if (!event.matches) {
+                    window.location.replace("./app/");
+                  }
+                };
+
+
+                if (
+                  typeof desktopQuery.addEventListener === "function"
+                ) {
+                  desktopQuery.addEventListener(
+                    "change",
+                    handleEnvironmentChange
+                  );
+                } else if (
+                  typeof desktopQuery.addListener === "function"
+                ) {
+                  desktopQuery.addListener(
+                    handleEnvironmentChange
+                  );
+                }
+              })();
+            </script>
+          </head>
+
+
+          <body>
+
+            <div class="glow glow-one"></div>
+
+            <div class="glow glow-two"></div>
+
+
+            <main class="desktop-demo">
+
+              <div class="phone">
+
+                <span
+                  class="button button-left-1"
+                  aria-hidden="true"
+                ></span>
+
+                <span
+                  class="button button-left-2"
+                  aria-hidden="true"
+                ></span>
+
+                <span
+                  class="button button-left-3"
+                  aria-hidden="true"
+                ></span>
+
+                <span
+                  class="button button-right"
+                  aria-hidden="true"
+                ></span>
+
+
+                <div
+                  class="dynamic-island"
+                  aria-hidden="true"
+                ></div>
+
+                <div
+                  class="camera-dot"
+                  aria-hidden="true"
+                ></div>
+
+
+                <iframe
+                  class="phone-screen"
+                  src="./app/"
+                  title="Quran Flutter App"
+                  loading="eager"
+                  allow="clipboard-read; clipboard-write"
+                  allowfullscreen
+                ></iframe>
+
+              </div>
+
+            </main>
+
+          </body>
+          </html>
+          EOF
+
+
+      # ============================================================
+      # 7. VERIFY GENERATED DEPLOYMENT FILES
+      #
+      # Berguna agar Actions langsung gagal jika struktur deployment
+      # tidak terbentuk sebagaimana mestinya.
+      # ============================================================
+
+      - name: Verify deployment files
+        run: |
+          echo "Checking generated files..."
+
+          test -f pages/index.html
+          test -f pages/.nojekyll
+
+          test -f pages/app/index.html
+          test -f pages/app/flutter_bootstrap.js
+
+          echo
+          echo "Deployment structure:"
+          find pages -maxdepth 2 -type f | sort | head -100
+
+          echo
+          echo "Deployment files verified successfully."
+
+
+      # ============================================================
+      # 8. CONFIGURE OFFICIAL GITHUB PAGES
+      # ============================================================
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
+
+      # ============================================================
+      # 9. UPLOAD OFFICIAL GITHUB PAGES ARTIFACT
+      #
+      # Perhatikan:
+      #
+      # DULU:
+      # path: build/web
+      #
+      # SEKARANG:
+      # path: pages
+      # ============================================================
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: build/web
+          path: pages
+
+
+      # ============================================================
+      # 10. KEEP BUILD SNAPSHOT IN gh-pages BRANCH
+      # ============================================================
 
       - name: Publish build to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
           publish_branch: gh-pages
-          publish_dir: ./build/web
+
+          publish_dir: ./pages
+
           force_orphan: true
+
+
+      # ============================================================
+      # 11. DEPLOY OFFICIAL GITHUB PAGES
+      # ============================================================
 
       - name: Deploy to GitHub Pages
         id: deployment
