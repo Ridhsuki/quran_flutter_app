@@ -26,7 +26,7 @@ jobs:
 
     steps:
       # ============================================================
-      # 1. CHECKOUT SOURCE
+      # 1. CHECKOUT
       # ============================================================
 
       - name: Checkout source
@@ -49,7 +49,7 @@ jobs:
 
 
       # ============================================================
-      # 3. INSTALL DEPENDENCIES
+      # 3. DEPENDENCIES
       # ============================================================
 
       - name: Install dependencies
@@ -59,13 +59,8 @@ jobs:
       # ============================================================
       # 4. BUILD FLUTTER WEB
       #
-      # Flutter asli akan berada di:
-      #
+      # Flutter asli ditempatkan pada:
       # /quran_flutter_app/app/
-      #
-      # Bukan lagi langsung di:
-      #
-      # /quran_flutter_app/
       # ============================================================
 
       - name: Build Flutter Web
@@ -76,24 +71,13 @@ jobs:
 
 
       # ============================================================
-      # 5. PREPARE GITHUB PAGES DIRECTORY
-      #
-      # Hasil akhirnya:
-      #
-      # pages/
-      # ├── index.html
-      # ├── .nojekyll
-      # └── app/
-      #     ├── index.html
-      #     ├── main.dart.js
-      #     ├── flutter_bootstrap.js
-      #     ├── assets/
-      #     └── ...
+      # 5. PREPARE DEPLOYMENT DIRECTORY
       # ============================================================
 
       - name: Prepare Pages directory
         run: |
           rm -rf pages
+
           mkdir -p pages/app
 
           cp -a build/web/. pages/app/
@@ -102,20 +86,26 @@ jobs:
 
 
       # ============================================================
-      # 6. CREATE DESKTOP-ONLY PHONE MOCKUP
+      # 6. PREPARE SOCIAL PREVIEW IMAGE
       #
-      # Desktop:
-      #   /quran_flutter_app/
-      #   -> phone mockup
-      #
-      # Mobile/tablet:
-      #   /quran_flutter_app/
-      #   -> redirect ke /quran_flutter_app/app/
-      #
-      # Source Flutter tidak diubah.
+      # Untuk sementara menggunakan icon Flutter.
+      # Nanti sebaiknya diganti image custom 1200x630.
       # ============================================================
 
-      - name: Create desktop demo shell
+      - name: Prepare social image
+        run: |
+          if [ -f pages/app/icons/Icon-512.png ]; then
+            cp pages/app/icons/Icon-512.png pages/og-image.png
+          elif [ -f pages/app/favicon.png ]; then
+            cp pages/app/favicon.png pages/og-image.png
+          fi
+
+
+      # ============================================================
+      # 7. CREATE SEO-FRIENDLY LANDING PAGE
+      # ============================================================
+
+      - name: Create SEO landing page
         run: |
           cat > pages/index.html <<'EOF'
           <!DOCTYPE html>
@@ -128,12 +118,190 @@ jobs:
               content="width=device-width, initial-scale=1.0"
             >
 
+            <title>
+              Quran Flutter App | Demo Aplikasi Al-Qur'an dengan Flutter
+            </title>
+
+            <meta
+              name="description"
+              content="Quran Flutter App adalah proyek pembelajaran Flutter untuk pengembangan aplikasi Al-Qur'an yang tersedia sebagai demo web dan source code terbuka di GitHub."
+            >
+
+            <meta
+              name="keywords"
+              content="Flutter, Flutter Quran App, Quran Flutter, aplikasi Al-Quran, Flutter Web, Dart, aplikasi Quran"
+            >
+
+            <meta
+              name="robots"
+              content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+            >
+
+            <meta
+              name="googlebot"
+              content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+            >
+
             <meta
               name="theme-color"
               content="#101410"
             >
 
-            <title>Quran Flutter App</title>
+            <meta
+              name="application-name"
+              content="Quran Flutter App"
+            >
+
+            <meta
+              name="referrer"
+              content="strict-origin-when-cross-origin"
+            >
+
+
+            <!-- ==================================================
+                 CANONICAL
+                 ================================================== -->
+
+            <link
+              rel="canonical"
+              href="https://ridhsuki.github.io/quran_flutter_app/"
+            >
+
+
+            <!-- ==================================================
+                 FAVICON
+                 ================================================== -->
+
+            <link
+              rel="icon"
+              type="image/png"
+              href="./app/favicon.png"
+            >
+
+            <link
+              rel="apple-touch-icon"
+              href="./app/icons/Icon-192.png"
+            >
+
+
+            <!-- ==================================================
+                 OPEN GRAPH
+                 Facebook, WhatsApp, LinkedIn, Discord, etc.
+                 ================================================== -->
+
+            <meta
+              property="og:type"
+              content="website"
+            >
+
+            <meta
+              property="og:locale"
+              content="id_ID"
+            >
+
+            <meta
+              property="og:site_name"
+              content="Quran Flutter App"
+            >
+
+            <meta
+              property="og:title"
+              content="Quran Flutter App | Demo Aplikasi Al-Qur'an dengan Flutter"
+            >
+
+            <meta
+              property="og:description"
+              content="Proyek pembelajaran Flutter untuk pengembangan aplikasi Al-Qur'an. Coba demo web dan lihat source code-nya di GitHub."
+            >
+
+            <meta
+              property="og:url"
+              content="https://ridhsuki.github.io/quran_flutter_app/"
+            >
+
+            <meta
+              property="og:image"
+              content="https://ridhsuki.github.io/quran_flutter_app/og-image.png"
+            >
+
+            <meta
+              property="og:image:alt"
+              content="Quran Flutter App"
+            >
+
+
+            <!-- ==================================================
+                 TWITTER / X
+                 ================================================== -->
+
+            <meta
+              name="twitter:card"
+              content="summary"
+            >
+
+            <meta
+              name="twitter:title"
+              content="Quran Flutter App | Flutter Project"
+            >
+
+            <meta
+              name="twitter:description"
+              content="Demo aplikasi Al-Qur'an yang dikembangkan menggunakan Flutter."
+            >
+
+            <meta
+              name="twitter:image"
+              content="https://ridhsuki.github.io/quran_flutter_app/og-image.png"
+            >
+
+
+            <!-- ==================================================
+                 STRUCTURED DATA
+                 ================================================== -->
+
+            <script type="application/ld+json">
+            {
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  "@id": "https://ridhsuki.github.io/quran_flutter_app/#website",
+                  "url": "https://ridhsuki.github.io/quran_flutter_app/",
+                  "name": "Quran Flutter App",
+                  "description": "Proyek pembelajaran Flutter untuk pengembangan aplikasi Al-Qur'an.",
+                  "inLanguage": "id-ID"
+                },
+                {
+                  "@type": "WebPage",
+                  "@id": "https://ridhsuki.github.io/quran_flutter_app/#webpage",
+                  "url": "https://ridhsuki.github.io/quran_flutter_app/",
+                  "name": "Quran Flutter App | Demo Aplikasi Al-Qur'an dengan Flutter",
+                  "description": "Demo dan dokumentasi proyek aplikasi Al-Qur'an yang dikembangkan menggunakan Flutter.",
+                  "isPartOf": {
+                    "@id": "https://ridhsuki.github.io/quran_flutter_app/#website"
+                  },
+                  "inLanguage": "id-ID"
+                },
+                {
+                  "@type": "SoftwareSourceCode",
+                  "@id": "https://ridhsuki.github.io/quran_flutter_app/#source",
+                  "name": "Quran Flutter App",
+                  "description": "Source code proyek pembelajaran aplikasi Al-Qur'an menggunakan Flutter dan Dart.",
+                  "programmingLanguage": [
+                    "Dart",
+                    "Flutter"
+                  ],
+                  "codeRepository": "https://github.com/Ridhsuki/quran_flutter_app",
+                  "url": "https://ridhsuki.github.io/quran_flutter_app/"
+                }
+              ]
+            }
+            </script>
+
+
+            <!-- ==================================================
+                 CSS
+                 ================================================== -->
 
             <style>
               *,
@@ -142,17 +310,17 @@ jobs:
                 box-sizing: border-box;
               }
 
+              html {
+                scroll-behavior: smooth;
+              }
+
               html,
               body {
                 margin: 0;
                 padding: 0;
 
                 width: 100%;
-                min-width: 100%;
-                height: 100%;
                 min-height: 100%;
-
-                overflow: hidden;
               }
 
               body {
@@ -165,78 +333,223 @@ jobs:
                   "Segoe UI",
                   sans-serif;
 
+                color: #f4f8f2;
+
                 background:
                   radial-gradient(
-                    circle at 50% 0%,
-                    #26382b 0%,
-                    #18231b 28%,
-                    #101610 58%,
-                    #080b09 100%
+                    circle at 20% 10%,
+                    #29402f 0%,
+                    #17231a 28%,
+                    #0e150f 58%,
+                    #070a08 100%
                   );
-
-                color: #ffffff;
               }
 
 
               /* ==================================================
-                 DESKTOP WRAPPER
+                 MAIN LAYOUT
                  ================================================== */
 
-              .desktop-demo {
-                width: 100vw;
-                height: 100vh;
-                height: 100dvh;
+              .page {
+                min-height: 100vh;
+                min-height: 100dvh;
 
-                display: flex;
+                display: grid;
+
+                grid-template-columns:
+                  minmax(320px, 540px)
+                  auto;
 
                 align-items: center;
                 justify-content: center;
 
-                padding: 24px;
+                gap: clamp(40px, 7vw, 120px);
+
+                padding:
+                  clamp(32px, 5vw, 72px);
               }
 
 
               /* ==================================================
-                 PHONE DEVICE
+                 SEO / PROJECT CONTENT
                  ================================================== */
+
+              .content {
+                max-width: 560px;
+              }
+
+              .eyebrow {
+                display: inline-flex;
+
+                margin-bottom: 18px;
+
+                padding: 7px 12px;
+
+                border:
+                  1px solid
+                  rgba(144, 215, 148, 0.28);
+
+                border-radius: 999px;
+
+                color: #a9e7ae;
+
+                background:
+                  rgba(144, 215, 148, 0.08);
+
+                font-size: 13px;
+
+                font-weight: 650;
+
+                letter-spacing: 0.04em;
+              }
+
+              h1 {
+                margin:
+                  0
+                  0
+                  20px;
+
+                font-size:
+                  clamp(
+                    42px,
+                    5.2vw,
+                    72px
+                  );
+
+                line-height: 1.02;
+
+                letter-spacing: -0.045em;
+              }
+
+              .description {
+                margin:
+                  0
+                  0
+                  24px;
+
+                max-width: 520px;
+
+                color: #bec9be;
+
+                font-size:
+                  clamp(
+                    16px,
+                    1.4vw,
+                    19px
+                  );
+
+                line-height: 1.75;
+              }
+
+              .features {
+                margin:
+                  0
+                  0
+                  30px;
+
+                padding-left: 22px;
+
+                color: #dbe3da;
+
+                line-height: 1.8;
+              }
+
+              .actions {
+                display: flex;
+
+                flex-wrap: wrap;
+
+                gap: 12px;
+              }
+
+              .button {
+                display: inline-flex;
+
+                align-items: center;
+                justify-content: center;
+
+                min-height: 48px;
+
+                padding:
+                  0
+                  18px;
+
+                border-radius: 12px;
+
+                text-decoration: none;
+
+                font-weight: 700;
+              }
+
+              .button-primary {
+                color: #08200c;
+
+                background: #90d794;
+              }
+
+              .button-secondary {
+                color: #edf4eb;
+
+                border:
+                  1px solid
+                  rgba(255, 255, 255, 0.14);
+
+                background:
+                  rgba(255, 255, 255, 0.055);
+              }
+
+              .button:hover {
+                transform: translateY(-1px);
+              }
+
+
+              /* ==================================================
+                 DEVICE STAGE
+                 ================================================== */
+
+              .device-stage {
+                display: flex;
+
+                align-items: center;
+                justify-content: center;
+              }
 
               .phone {
                 position: relative;
 
-                height: min(
-                  860px,
-                  calc(100dvh - 48px)
-                );
+                height:
+                  min(
+                    840px,
+                    calc(100dvh - 60px)
+                  );
 
                 aspect-ratio: 430 / 932;
 
                 padding: 10px;
+
+                border:
+                  1px solid
+                  rgba(255, 255, 255, 0.18);
 
                 border-radius: 52px;
 
                 background:
                   linear-gradient(
                     145deg,
-                    #303030 0%,
-                    #090909 35%,
-                    #000000 70%,
-                    #202020 100%
+                    #353535,
+                    #090909 38%,
+                    #000000 72%,
+                    #242424
                   );
 
-                border:
-                  1px solid
-                  rgba(255, 255, 255, 0.20);
-
                 box-shadow:
-                  0 60px 120px rgba(0, 0, 0, 0.55),
-                  0 25px 60px rgba(0, 0, 0, 0.50),
-                  inset 0 1px 1px rgba(255, 255, 255, 0.22);
+                  0 60px 120px
+                    rgba(0, 0, 0, 0.52),
+                  0 20px 50px
+                    rgba(0, 0, 0, 0.45),
+                  inset 0 1px 1px
+                    rgba(255, 255, 255, 0.20);
               }
-
-
-              /* ==================================================
-                 PHONE SCREEN
-                 ================================================== */
 
               .phone-screen {
                 display: block;
@@ -244,23 +557,12 @@ jobs:
                 width: 100%;
                 height: 100%;
 
-                margin: 0;
-                padding: 0;
-
                 border: 0;
-                outline: 0;
 
                 border-radius: 43px;
 
                 background: #ffffff;
-
-                overflow: hidden;
               }
-
-
-              /* ==================================================
-                 DYNAMIC ISLAND / CAMERA AREA
-                 ================================================== */
 
               .dynamic-island {
                 position: absolute;
@@ -268,17 +570,15 @@ jobs:
                 top: 20px;
                 left: 50%;
 
-                transform: translateX(-50%);
-
-                width: 105px;
+                width: 104px;
                 height: 29px;
+
+                transform:
+                  translateX(-50%);
 
                 border-radius: 999px;
 
                 background: #000000;
-
-                box-shadow:
-                  0 1px 2px rgba(255, 255, 255, 0.08);
 
                 pointer-events: none;
 
@@ -286,116 +586,8 @@ jobs:
               }
 
 
-              .camera-dot {
-                position: absolute;
-
-                top: 28px;
-
-                left:
-                  calc(50% + 32px);
-
-                width: 7px;
-                height: 7px;
-
-                border-radius: 50%;
-
-                background: #101c24;
-
-                pointer-events: none;
-
-                z-index: 21;
-              }
-
-
               /* ==================================================
-                 SIDE BUTTONS
-                 ================================================== */
-
-              .button {
-                position: absolute;
-
-                width: 3px;
-
-                background: #151515;
-
-                border-radius: 4px;
-              }
-
-
-              .button-left-1 {
-                left: -4px;
-
-                top: 145px;
-
-                height: 32px;
-              }
-
-
-              .button-left-2 {
-                left: -4px;
-
-                top: 200px;
-
-                height: 65px;
-              }
-
-
-              .button-left-3 {
-                left: -4px;
-
-                top: 280px;
-
-                height: 65px;
-              }
-
-
-              .button-right {
-                right: -4px;
-
-                top: 220px;
-
-                height: 90px;
-              }
-
-
-              /* ==================================================
-                 DECORATIVE BACKGROUND GLOW
-                 ================================================== */
-
-              .glow {
-                position: fixed;
-
-                width: 520px;
-                height: 520px;
-
-                border-radius: 50%;
-
-                filter: blur(120px);
-
-                opacity: 0.16;
-
-                pointer-events: none;
-              }
-
-
-              .glow-one {
-                top: -250px;
-                left: -150px;
-
-                background: #7ed889;
-              }
-
-
-              .glow-two {
-                right: -180px;
-                bottom: -280px;
-
-                background: #65c980;
-              }
-
-
-              /* ==================================================
-                 NON DESKTOP SAFETY
+                 MOBILE
                  ================================================== */
 
               @media
@@ -403,131 +595,256 @@ jobs:
                 (hover: none),
                 (pointer: coarse) {
 
-                .desktop-demo {
+                body {
+                  background: #ffffff;
+                }
+
+                .page {
+                  display: flex;
+
+                  flex-direction: column;
+
+                  gap: 0;
+
+                  padding: 0;
+
+                  background: #ffffff;
+                }
+
+                .device-stage {
+                  order: 1;
+
+                  width: 100%;
+
+                  height: 100vh;
+                  height: 100dvh;
+                }
+
+                .phone {
+                  width: 100%;
+                  height: 100%;
+
+                  aspect-ratio: auto;
+
+                  padding: 0;
+
+                  border: 0;
+
+                  border-radius: 0;
+
+                  background: #ffffff;
+
+                  box-shadow: none;
+                }
+
+                .phone-screen {
+                  width: 100%;
+                  height: 100%;
+
+                  border-radius: 0;
+                }
+
+                .dynamic-island {
                   display: none;
+                }
+
+                /*
+                 * Konten ini tetap benar-benar menjadi bagian halaman.
+                 * Tidak menggunakan display:none agar masih menjadi
+                 * konten crawlable biasa.
+                 */
+
+                .content {
+                  order: 2;
+
+                  width: 100%;
+                  max-width: none;
+
+                  padding:
+                    48px
+                    24px;
+
+                  color: #172018;
+
+                  background: #f5f8f3;
+                }
+
+                .eyebrow {
+                  color: #1f642e;
+
+                  background:
+                    rgba(31, 100, 46, 0.08);
+
+                  border-color:
+                    rgba(31, 100, 46, 0.18);
+                }
+
+                h1 {
+                  color: #121812;
+
+                  font-size:
+                    clamp(
+                      36px,
+                      11vw,
+                      54px
+                    );
+                }
+
+                .description,
+                .features {
+                  color: #485448;
+                }
+
+                .button-primary {
+                  color: white;
+
+                  background: #1f642e;
+                }
+
+                .button-secondary {
+                  color: #1f642e;
+
+                  border-color:
+                    rgba(31, 100, 46, 0.18);
+
+                  background: white;
                 }
               }
             </style>
-
-
-            <script>
-              (() => {
-                /*
-                 * Mockup hanya digunakan jika:
-                 *
-                 * 1. viewport >= 1024 px
-                 * 2. device mendukung hover
-                 * 3. pointer utama bertipe fine
-                 *
-                 * Ini lebih akurat daripada sekadar mengecek
-                 * user-agent "Android", "iPhone", dsb.
-                 */
-
-                const desktopQuery =
-                  window.matchMedia(
-                    "(min-width: 1024px) and " +
-                    "(hover: hover) and " +
-                    "(pointer: fine)"
-                  );
-
-
-                /*
-                 * Jika bukan environment desktop,
-                 * langsung buka Flutter App asli.
-                 */
-
-                if (!desktopQuery.matches) {
-                  window.location.replace("./app/");
-                  return;
-                }
-
-
-                /*
-                 * Jika window desktop diperkecil sampai masuk
-                 * kondisi non-desktop, arahkan ke Flutter asli.
-                 */
-
-                const handleEnvironmentChange = (event) => {
-                  if (!event.matches) {
-                    window.location.replace("./app/");
-                  }
-                };
-
-
-                if (
-                  typeof desktopQuery.addEventListener === "function"
-                ) {
-                  desktopQuery.addEventListener(
-                    "change",
-                    handleEnvironmentChange
-                  );
-                } else if (
-                  typeof desktopQuery.addListener === "function"
-                ) {
-                  desktopQuery.addListener(
-                    handleEnvironmentChange
-                  );
-                }
-              })();
-            </script>
           </head>
 
 
           <body>
 
-            <div class="glow glow-one"></div>
+            <main class="page">
 
-            <div class="glow glow-two"></div>
+              <!-- ================================================
+                   STATIC, CRAWLABLE SEO CONTENT
+                   ================================================ -->
 
+              <article class="content">
 
-            <main class="desktop-demo">
-
-              <div class="phone">
-
-                <span
-                  class="button button-left-1"
-                  aria-hidden="true"
-                ></span>
-
-                <span
-                  class="button button-left-2"
-                  aria-hidden="true"
-                ></span>
-
-                <span
-                  class="button button-left-3"
-                  aria-hidden="true"
-                ></span>
-
-                <span
-                  class="button button-right"
-                  aria-hidden="true"
-                ></span>
+                <span class="eyebrow">
+                  Flutter Learning Project
+                </span>
 
 
-                <div
-                  class="dynamic-island"
-                  aria-hidden="true"
-                ></div>
-
-                <div
-                  class="camera-dot"
-                  aria-hidden="true"
-                ></div>
+                <h1>
+                  Quran Flutter App
+                </h1>
 
 
-                <iframe
-                  class="phone-screen"
-                  src="./app/"
-                  title="Quran Flutter App"
-                  loading="eager"
-                  allow="clipboard-read; clipboard-write"
-                  allowfullscreen
-                ></iframe>
+                <p class="description">
+                  Quran Flutter App merupakan proyek pembelajaran
+                  Flutter yang dikembangkan sebagai aplikasi
+                  Al-Qur'an lintas platform. Versi web tersedia
+                  sebagai live demo, sedangkan source code proyek
+                  dapat dipelajari secara terbuka melalui GitHub.
+                </p>
 
-              </div>
+
+                <ul class="features">
+                  <li>
+                    Dikembangkan menggunakan Flutter dan Dart.
+                  </li>
+
+                  <li>
+                    Mendukung pengalaman aplikasi pada perangkat
+                    mobile dan web.
+                  </li>
+
+                  <li>
+                    Dibangun sebagai proyek pembelajaran dan
+                    pengembangan aplikasi Al-Qur'an.
+                  </li>
+
+                  <li>
+                    Source code tersedia secara terbuka di GitHub.
+                  </li>
+                </ul>
+
+
+                <nav
+                  class="actions"
+                  aria-label="Project navigation"
+                >
+
+                  <a
+                    class="button button-primary"
+                    href="./app/"
+                  >
+                    Buka Aplikasi
+                  </a>
+
+                  <a
+                    class="button button-secondary"
+                    href="https://github.com/Ridhsuki/quran_flutter_app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Lihat Source Code
+                  </a>
+
+                </nav>
+
+              </article>
+
+
+              <!-- ================================================
+                   FLUTTER APPLICATION
+                   ================================================ -->
+
+              <section
+                class="device-stage"
+                aria-label="Quran Flutter App live demo"
+              >
+
+                <div class="phone">
+
+                  <div
+                    class="dynamic-island"
+                    aria-hidden="true"
+                  ></div>
+
+
+                  <iframe
+                    class="phone-screen"
+                    src="./app/"
+                    title="Live Demo Quran Flutter App"
+                    loading="eager"
+                    allow="clipboard-read; clipboard-write"
+                  ></iframe>
+
+                </div>
+
+              </section>
 
             </main>
+
+
+            <!-- ================================================
+                 FALLBACK WITHOUT JAVASCRIPT
+                 ================================================ -->
+
+            <noscript>
+              <section>
+                <h2>
+                  Quran Flutter App
+                </h2>
+
+                <p>
+                  Browser Anda menonaktifkan JavaScript.
+                  Flutter Web membutuhkan JavaScript untuk
+                  menjalankan aplikasi.
+                </p>
+
+                <p>
+                  <a href="https://github.com/Ridhsuki/quran_flutter_app">
+                    Lihat source code Quran Flutter App di GitHub
+                  </a>
+                </p>
+              </section>
+            </noscript>
 
           </body>
           </html>
@@ -535,32 +852,126 @@ jobs:
 
 
       # ============================================================
-      # 7. VERIFY GENERATED DEPLOYMENT FILES
+      # 8. KEEP DIRECT FLUTTER APP OUT OF SEARCH RESULTS
       #
-      # Berguna agar Actions langsung gagal jika struktur deployment
-      # tidak terbentuk sebagaimana mestinya.
+      # /app/ tetap dapat digunakan user,
+      # tetapi URL utama untuk Google adalah root.
+      #
+      # indexifembedded memungkinkan Google memahami konten saat
+      # Flutter di-embed pada landing page.
+      # ============================================================
+
+      - name: Configure Flutter app indexing
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          path = Path("pages/app/index.html")
+
+          html = path.read_text(encoding="utf-8")
+
+          marker = "</head>"
+
+          seo = """
+            <meta name="robots" content="noindex, indexifembedded">
+
+            <meta
+              name="description"
+              content="Quran Flutter App interactive web application."
+            >
+          """
+
+          if "indexifembedded" not in html:
+              html = html.replace(
+                  marker,
+                  seo + "\n" + marker,
+                  1
+              )
+
+          path.write_text(
+              html,
+              encoding="utf-8"
+          )
+          PY
+
+
+      # ============================================================
+      # 9. ROBOTS.TXT
+      # ============================================================
+
+      - name: Create robots.txt
+        run: |
+          cat > pages/robots.txt <<'EOF'
+          User-agent: *
+          Allow: /
+
+          Sitemap: https://ridhsuki.github.io/quran_flutter_app/sitemap.xml
+          EOF
+
+
+      # ============================================================
+      # 10. XML SITEMAP
+      #
+      # Saat ini hanya ada satu halaman SEO.
+      # Nanti bisa ditambah halaman Surah, Tentang, dll.
+      # ============================================================
+
+      - name: Create sitemap.xml
+        run: |
+          cat > pages/sitemap.xml <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <urlset
+            xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+          >
+            <url>
+              <loc>https://ridhsuki.github.io/quran_flutter_app/</loc>
+            </url>
+          </urlset>
+          EOF
+
+
+      # ============================================================
+      # 11. VERIFY SEO + DEPLOYMENT FILES
       # ============================================================
 
       - name: Verify deployment files
         run: |
-          echo "Checking generated files..."
+          echo "Checking deployment..."
 
           test -f pages/index.html
+          test -f pages/robots.txt
+          test -f pages/sitemap.xml
           test -f pages/.nojekyll
 
           test -f pages/app/index.html
           test -f pages/app/flutter_bootstrap.js
 
-          echo
-          echo "Deployment structure:"
-          find pages -maxdepth 2 -type f | sort | head -100
+          grep -q \
+            'rel="canonical"' \
+            pages/index.html
+
+          grep -q \
+            'application/ld+json' \
+            pages/index.html
+
+          grep -q \
+            'noindex, indexifembedded' \
+            pages/app/index.html
 
           echo
-          echo "Deployment files verified successfully."
+          echo "Deployment structure:"
+          find pages \
+            -maxdepth 2 \
+            -type f \
+            | sort \
+            | head -100
+
+          echo
+          echo "SEO deployment verification passed."
 
 
       # ============================================================
-      # 8. CONFIGURE OFFICIAL GITHUB PAGES
+      # 12. CONFIGURE GITHUB PAGES
       # ============================================================
 
       - name: Configure GitHub Pages
@@ -568,15 +979,7 @@ jobs:
 
 
       # ============================================================
-      # 9. UPLOAD OFFICIAL GITHUB PAGES ARTIFACT
-      #
-      # Perhatikan:
-      #
-      # DULU:
-      # path: build/web
-      #
-      # SEKARANG:
-      # path: pages
+      # 13. UPLOAD OFFICIAL PAGES ARTIFACT
       # ============================================================
 
       - name: Upload Pages artifact
@@ -586,7 +989,7 @@ jobs:
 
 
       # ============================================================
-      # 10. KEEP BUILD SNAPSHOT IN gh-pages BRANCH
+      # 14. KEEP SNAPSHOT IN gh-pages
       # ============================================================
 
       - name: Publish build to gh-pages branch
@@ -602,7 +1005,7 @@ jobs:
 
 
       # ============================================================
-      # 11. DEPLOY OFFICIAL GITHUB PAGES
+      # 15. DEPLOY
       # ============================================================
 
       - name: Deploy to GitHub Pages
