@@ -1,350 +1,314 @@
 name: Build and Deploy Flutter Web
-
-
-on:
+'on':
   push:
     branches:
       - main
-
-  workflow_dispatch:
-
-
+  workflow_dispatch: null
 permissions:
   contents: write
   pages: write
   id-token: write
-
-
 concurrency:
   group: flutter-web-pages
   cancel-in-progress: true
-
-
-
 jobs:
-
   build-and-deploy:
-
     runs-on: ubuntu-latest
-
-
     environment:
-
       name: github-pages
-
-      url: ${{ steps.deployment.outputs.page_url }}
-
-
-
+      url: '${{ steps.deployment.outputs.page_url }}'
     steps:
-
-
-      # =====================================
-      # Checkout
-      # =====================================
-
       - name: Checkout source
-
         uses: actions/checkout@v6
-
-
-
-
-
-      # =====================================
-      # Flutter
-      # =====================================
-
       - name: Setup Flutter
-
         uses: subosito/flutter-action@v2
-
         with:
-
           channel: stable
-
           cache: true
-
-
-
-
       - name: Flutter version
-
         run: flutter --version
-
-
-
-
-
       - name: Install dependencies
-
         run: flutter pub get
-
-
-
-
-
-      # =====================================
-      # Build Flutter Web
-      #
-      # Flutter application:
-      # /app/
-      #
-      # Wrapper:
-      # /
-      # =====================================
-
       - name: Build Flutter Web
-
         run: |
 
           flutter build web \
           --release \
           --base-href "/quran_flutter_app/app/"
-
-
-
-
-
-      # =====================================
-      # Prepare pages
-      # =====================================
-
       - name: Prepare pages directory
-
         run: |
 
           rm -rf pages
 
           mkdir -p pages/app
 
-
           cp -a build/web/. pages/app/
 
-
           touch pages/.nojekyll
-
-
-
-
-
-      # =====================================
-      # Create clean desktop wrapper
-      # =====================================
-
       - name: Create desktop preview
-
-
-        run: |
+        run: >
 
           cat > pages/index.html <<'EOF'
-              <!DOCTYPE html>
-              <html lang="id">
-
-              <head>
-
-              <meta charset="UTF-8">
-
-              <meta name="viewport"
-              content="width=device-width, initial-scale=1.0">
 
 
-              <title>
-              Quran Flutter App | Flutter Web Project
-              </title>
+          <!DOCTYPE html>
 
 
-              <meta name="description"
-              content="Quran Flutter App merupakan aplikasi Al-Qur'an berbasis Flutter yang tersedia sebagai live web demo.">
-
-
-              <meta name="robots"
-              content="index, follow">
-
-
-              <link rel="canonical"
-              href="https://ridhsuki.github.io/quran_flutter_app/">
+          <html lang="id">
 
 
 
-              <meta property="og:type"
-              content="website">
-
-
-              <meta property="og:title"
-              content="Quran Flutter App">
-
-
-              <meta property="og:description"
-              content="Flutter application project for Quran reading experience.">
-
-
-              <meta property="og:url"
-              content="https://ridhsuki.github.io/quran_flutter_app/">
+          <head>
 
 
 
-              <script type="application/ld+json">
-
-              {
-                "@context":"https://schema.org",
-                "@type":"SoftwareSourceCode",
-                "name":"Quran Flutter App",
-                "programmingLanguage":[
-                  "Dart",
-                  "Flutter"
-                ],
-                "codeRepository":
-                "https://github.com/Ridhsuki/quran_flutter_app"
-              }
-
-              </script>
-
-
-              <style>
-
-              *{
-              box-sizing:border-box;
-              }
-
-
-              html,
-              body{
-
-              margin:0;
-
-              width:100%;
-
-              height:100%;
-
-              }
+          <meta charset="UTF-8">
 
 
 
-              body{
+          <meta name="viewport"
 
-              display:flex;
-
-              justify-content:center;
-
-              align-items:center;
+          content="width=device-width, initial-scale=1.0">
 
 
-              overflow:hidden;
+
+          <title>
+
+          Quran Flutter App | Flutter Web Project
+
+          </title>
 
 
-              background:
 
-              radial-gradient(
+          <meta name="description"
+
+          content="Quran Flutter App merupakan aplikasi Al-Qur'an berbasis
+          Flutter yang tersedia sebagai live web demo.">
+
+
+
+          <meta name="robots"
+
+          content="index, follow">
+
+
+
+          <link rel="canonical"
+
+          href="https://ridhsuki.github.io/quran_flutter_app/">
+
+
+
+
+          <meta property="og:type"
+
+          content="website">
+
+
+
+          <meta property="og:title"
+
+          content="Quran Flutter App">
+
+
+
+          <meta property="og:description"
+
+          content="Flutter application project for Quran reading experience.">
+
+
+
+          <meta property="og:url"
+
+          content="https://ridhsuki.github.io/quran_flutter_app/">
+
+
+
+
+          <script type="application/ld+json">
+
+
+          {
+
+            "@context":"https://schema.org",
+
+            "@type":"SoftwareSourceCode",
+
+            "name":"Quran Flutter App",
+
+            "programmingLanguage":[
+              "Dart",
+              "Flutter"
+            ],
+
+            "codeRepository":
+            "https://github.com/Ridhsuki/quran_flutter_app"
+
+          }
+
+
+          </script>
+
+
+
+
+          <style>
+
+
+
+          *{
+
+            box-sizing:border-box;
+
+          }
+
+
+
+
+          html,
+
+          body{
+
+            margin:0;
+
+            width:100%;
+
+            height:100%;
+
+          }
+
+
+
+
+          body{
+
+
+            display:flex;
+
+            justify-content:center;
+
+            align-items:center;
+
+
+            overflow:hidden;
+
+
+            background:
+
+            radial-gradient(
               circle,
               #263529,
               #080b09
-              );
-
-              }
+            );
 
 
-
-              .device{
-
-              position:relative;
+          }
 
 
-              height:min(
+
+
+          .device{
+
+
+            height:min(
               820px,
               90vh
-              );
+            );
 
 
-              aspect-ratio:
-              430 / 932;
+            aspect-ratio:
+            430 / 932;
 
 
-              padding:10px;
+            padding:10px;
 
 
-              border-radius:48px;
+            border-radius:48px;
 
 
-              background:#080808;
+            background:#080808;
 
 
-              box-shadow:
+            box-shadow:
 
-              0 40px 100px
-              rgba(0,0,0,.6);
-
-              }
+            0 40px 100px
+            rgba(0,0,0,.6);
 
 
+          }
 
 
-              .screen{
-
-              width:100%;
-
-              height:100%;
 
 
-              border:0;
+          .screen{
 
 
-              border-radius:40px;
+            width:100%;
 
+            height:100%;
+
+
+            border:0;
+
+
+            border-radius:40px;
+
+
+            background:white;
+
+
+          }
+
+
+
+
+          .camera{
+
+
+            position:absolute;
+
+
+            top:25px;
+
+
+            left:50%;
+
+
+            transform:
+            translateX(-50%);
+
+
+            width:90px;
+
+
+            height:24px;
+
+
+            border-radius:20px;
+
+
+            background:#000;
+
+
+            z-index:10;
+
+
+          }
+
+
+
+
+          @media(max-width:900px){
+
+
+            body{
 
               background:white;
 
-              }
+            }
 
 
-
-
-              .camera{
-
-              position:absolute;
-
-
-              top:25px;
-
-
-              left:50%;
-
-
-              transform:
-              translateX(-50%);
-
-
-              width:90px;
-
-
-              height:24px;
-
-
-              border-radius:20px;
-
-
-              background:#000;
-
-
-              z-index:10;
-
-              }
-
-
-
-
-              @media(max-width:900px){
-
-
-              body{
-
-              background:white;
-
-              }
-
-
-
-              .device{
+            .device{
 
 
               width:100vw;
@@ -363,263 +327,144 @@ jobs:
 
               box-shadow:none;
 
-              }
+
+            }
 
 
-
-              .screen{
+            .screen{
 
               border-radius:0;
 
-              }
+            }
 
 
-
-              .camera{
+            .camera{
 
               display:none;
 
-              }
+            }
 
 
-              }
-
-              </style>
-
-
-              </head>
-
-
-              <body>
-
-
-              <div class="device">
-
-
-              <div class="camera"></div>
-
-
-
-              <iframe
-
-              class="screen"
-
-              src="./app/"
-
-              title="Quran Flutter App"
-
-              loading="eager">
-
-              </iframe>
-
-
-
-              </div>
-
-
-              </body>
-
-
-              </html>
-              EOF
+          }
 
 
 
 
-
-                    # =====================================
-                    # Minify wrapper only
-                    # =====================================
-
-                    - name: Install html minifier
-
-
-                      run: |
-
-                        npm install -g html-minifier-terser
+          </style>
 
 
 
-
-
-                    - name: Minify index.html
-
-
-                      run: |
-
-                        html-minifier-terser \
-                        pages/index.html \
-                        --collapse-whitespace \
-                        --remove-comments \
-                        --remove-redundant-attributes \
-                        --remove-script-type-attributes \
-                        --remove-tag-whitespace \
-                        --use-short-doctype \
-                        -o pages/index.html
+          </head>
 
 
 
-
-
-                    # =====================================
-                    # SEO files
-                    # =====================================
-
-                    - name: Create robots.txt
-
-
-                      run: |
-
-                        cat > pages/robots.txt <<'EOF'
-              User-agent: *
-              Allow: /
-
-              Sitemap:
-              https://ridhsuki.github.io/quran_flutter_app/sitemap.xml
-              EOF
+          <body>
 
 
 
+          <div class="device">
 
 
-                    - name: Create sitemap.xml
+
+          <div class="camera"></div>
 
 
-                      run: |
 
-                        cat > pages/sitemap.xml <<'EOF'
-              <?xml version="1.0" encoding="UTF-8"?>
+          <iframe
 
-              <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-              <url>
+          class="screen"
+
+
+          src="./app/"
+
+
+          title="Quran Flutter App"
+
+
+          loading="eager"
+
+
+          >
+
+
+          </iframe>
+
+
+
+          </div>
+
+
+
+          </body>
+
+
+
+          </html>
+
+
+
+          EOF
+      - name: Create robots.txt
+        run: |
+
+          cat > pages/robots.txt <<EOF
+
+          User-agent: *
+
+          Allow: /
+
+          Sitemap:
+          https://ridhsuki.github.io/quran_flutter_app/sitemap.xml
+
+          EOF
+      - name: Create sitemap.xml
+        run: |
+
+          cat > pages/sitemap.xml <<EOF
+
+          <?xml version="1.0" encoding="UTF-8"?>
+
+          <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+            <url>
 
               <loc>
               https://ridhsuki.github.io/quran_flutter_app/
               </loc>
 
-              </url>
-
-              </urlset>
-              EOF
-
-
-
-
-
-                    # =====================================
-                    # Validation
-                    # =====================================
-
-                    - name: Validate deployment
-
-
-                      run: |
-
-
-                        test -f pages/index.html
-
-
-                        test -f pages/app/index.html
-
-
-                        test -f pages/app/flutter_bootstrap.js
-
-
-                        test -f pages/robots.txt
-
-
-                        test -f pages/sitemap.xml
-
-
-
-                        echo "Deployment validation passed"
-
-
-
-                        echo ""
-
-                        echo "Deployment size:"
-
-                        du -sh pages
-
-
-
-                        echo ""
-
-                        echo "Index size:"
-
-                        wc -c pages/index.html
-
-
-
-
-
-                    # =====================================
-                    # GitHub Pages
-                    # =====================================
-
-
-                    - name: Configure GitHub Pages
-
-                      uses: actions/configure-pages@v5
-
-
-
-
-
-                    - name: Upload Pages artifact
-
-
-                      uses: actions/upload-pages-artifact@v4
-
-
-                      with:
-
-                        path: pages
-
-
-
-
-
-                    # =====================================
-                    # gh-pages snapshot
-                    # =====================================
-
-
-                    - name: Publish gh-pages branch
-
-
-                      uses: peaceiris/actions-gh-pages@v4
-
-
-                      with:
-
-
-                        github_token: ${{ secrets.GITHUB_TOKEN }}
-
-
-                        publish_branch: gh-pages
-
-
-                        publish_dir: ./pages
-
-
-                        force_orphan: true
-
-
-
-
-
-                    # =====================================
-                    # Deploy
-                    # =====================================
-
-
-                    - name: Deploy to GitHub Pages
-
-
-                      id: deployment
-
-
-                      uses: actions/deploy-pages@v4
+            </url>
+
+          </urlset>
+
+          EOF
+      - name: Validate deployment
+        run: |
+
+          test -f pages/index.html
+
+          test -f pages/app/index.html
+
+          test -f pages/app/flutter_bootstrap.js
+
+          test -f pages/robots.txt
+
+          test -f pages/sitemap.xml
+
+          echo "Deployment validation passed"
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: pages
+      - name: Publish gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: '${{ secrets.GITHUB_TOKEN }}'
+          publish_branch: gh-pages
+          publish_dir: ./pages
+          force_orphan: true
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
