@@ -405,6 +405,23 @@ jobs:
 
 
           EOF
+      - name: Minify HTML
+
+        run: |
+
+
+          npm install -g html-minifier-terser
+
+
+          html-minifier-terser \
+          pages/index.html \
+          --collapse-whitespace \
+          --remove-comments \
+          --remove-redundant-attributes \
+          --remove-script-type-attributes \
+          --remove-tag-whitespace \
+          --use-short-doctype \
+          -o pages/index.html
       - name: Create robots.txt
         run: |
 
