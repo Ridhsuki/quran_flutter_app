@@ -408,11 +408,8 @@ jobs:
       - name: Minify HTML
 
         run: |
-
-
           npm install -g html-minifier-terser
-
-
+          html-minifier-terser --version
           html-minifier-terser \
           pages/index.html \
           --collapse-whitespace \
@@ -421,6 +418,8 @@ jobs:
           --remove-script-type-attributes \
           --remove-tag-whitespace \
           --use-short-doctype \
+          --minify-css true \
+          --minify-js true \
           -o pages/index.html
       - name: Create robots.txt
         run: |
