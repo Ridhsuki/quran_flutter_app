@@ -1,0 +1,8 @@
+
+User-agent: *
+
+Allow: /
+
+Sitemap:
+https://ridhsuki.github.io/quran_flutter_app/sitemap.xml
+
