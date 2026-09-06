@@ -31,10 +31,9 @@ class RemoteResource {
       final response = await dio.get('quran/surah');
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
-        List<SurahModel> surahList =
-            data.map((json) {
-              return SurahModel.fromMap(json);
-            }).toList();
+        List<SurahModel> surahList = data.map((json) {
+          return SurahModel.fromMap(json);
+        }).toList();
         return Right(surahList);
       } else {
         return Left('Error: ${response.statusCode}');
@@ -58,5 +57,3 @@ class RemoteResource {
     }
   }
 }
-
-

@@ -25,4 +25,3 @@ TextTheme createTextTheme(
   );
   return textTheme;
 }
-
