@@ -405,10 +405,9 @@ jobs:
 
 
           EOF
-          
       - name: Minify JSON-LD
         run: |
-          node <<'EOF'
+          cat > /tmp/minify-json-ld.js <<'EOF'
           const fs = require('fs');
 
           const file = 'pages/index.html';
@@ -421,7 +420,9 @@ jobs:
           );
 
           fs.writeFileSync(file, html);
-          EOF            
+          EOF
+
+          node /tmp/minify-json-ld.js  
       - name: Minify HTML
         run: |
           npm install -g html-minifier-terser
