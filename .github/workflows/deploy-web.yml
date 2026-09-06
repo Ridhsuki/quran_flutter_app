@@ -405,22 +405,39 @@ jobs:
 
 
           EOF
-      - name: Minify HTML
+          
+      - name: Minify JSON-LD
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
 
+          const file = 'pages/index.html';
+          let html = fs.readFileSync(file, 'utf8');
+
+          html = html.replace(
+            /(<script\s+type=["']application\/ld\+json["']>)([\s\S]*?)(<\/script>)/gi,
+            (_, open, json, close) =>
+              `${open}${JSON.stringify(JSON.parse(json))}${close}`
+          );
+
+          fs.writeFileSync(file, html);
+          EOF            
+      - name: Minify HTML
         run: |
           npm install -g html-minifier-terser
           html-minifier-terser --version
+
           html-minifier-terser \
-          pages/index.html \
-          --collapse-whitespace \
-          --remove-comments \
-          --remove-redundant-attributes \
-          --remove-script-type-attributes \
-          --remove-tag-whitespace \
-          --use-short-doctype \
-          --minify-css true \
-          --minify-js true \
-          -o pages/index.html
+            pages/index.html \
+            --collapse-whitespace \
+            --remove-comments \
+            --remove-redundant-attributes \
+            --remove-script-type-attributes \
+            --remove-tag-whitespace \
+            --use-short-doctype \
+            --minify-css true \
+            --minify-js true \
+            -o pages/index.html
       - name: Create robots.txt
         run: |
 
