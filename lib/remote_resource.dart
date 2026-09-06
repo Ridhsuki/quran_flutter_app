@@ -28,7 +28,7 @@ class RemoteResource {
 
   Future<Either<String, List<Datum>>> fetchQuran() async {
     try {
-      final response = await dio.get('quran/surah');
+      final response = await dio.get('surat');
       if (response.statusCode == 200) {
         final result = SurahModel.fromMap(response.data);
 
@@ -43,7 +43,7 @@ class RemoteResource {
 
   Future<Either<String, DetailSurahModel>> detailSurah(int id) async {
     try {
-      final response = await dio.get('quran/surah/$id');
+      final response = await dio.get('surat$id');
       if (response.statusCode == 200) {
         DetailSurahModel detailSurah = DetailSurahModel.fromMap(response.data);
         return Right(detailSurah);
