@@ -12,7 +12,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final remoteResource = RemoteResource();
-  final List<SurahModel> surahList = [];
+  final List<Datum> surahList = [];
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget buildSurahCard(SurahModel surah) {
+  Widget buildSurahCard(Datum surah) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),

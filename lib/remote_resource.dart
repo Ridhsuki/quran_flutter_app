@@ -26,15 +26,13 @@ class RemoteResource {
     );
   }
 
-  Future<Either<String, List<SurahModel>>> fetchQuran() async {
+  Future<Either<String, List<Datum>>> fetchQuran() async {
     try {
       final response = await dio.get('quran/surah');
       if (response.statusCode == 200) {
-        List<dynamic> data = response.data;
-        List<SurahModel> surahList = data.map((json) {
-          return SurahModel.fromMap(json);
-        }).toList();
-        return Right(surahList);
+        final result = SurahModel.fromMap(response.data);
+
+        return Right(result.data ?? []);
       } else {
         return Left('Error: ${response.statusCode}');
       }
